@@ -1,11 +1,10 @@
 services:
   - type: web
     name: jurnal
-    runtime: static
+    runtime: node
     buildCommand: bun install && bun run build
-    staticPublishPath: dist/client
+    startCommand: node dist/server/server.js
     pullRequestPreviewsEnabled: false
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+    envVars:
+      - key: NODE_ENV
+        value: production
