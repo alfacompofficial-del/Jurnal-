@@ -1,0 +1,7 @@
+project_id = "iudwxuyipxioeluljznk"
+
+[functions.admin-users]
+verify_jwt = false
+
+[functions.teacher-grade]
+verify_jwt = false
