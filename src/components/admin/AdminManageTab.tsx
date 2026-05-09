@@ -18,23 +18,34 @@ export function AdminManageTab() {
   useEffect(() => { reload(); }, []);
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Управление</h2>
-      <div className="grid grid-cols-4 gap-1 bg-muted p-1 rounded-lg text-xs">
+    <div className="space-y-6 max-w-4xl mx-auto pb-10">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 bg-primary/10 flex items-center justify-center rounded-xl">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h2 className="text-2xl font-bold tracking-tight">Управление школой</h2>
+      </div>
+      
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 bg-muted/50 p-1.5 rounded-2xl text-sm font-medium border border-border/50">
         {[
-          { id: "classes", l: "Классы" },
-          { id: "students", l: "Ученики" },
-          { id: "teachers", l: "Учителя" },
-          { id: "news", l: "Новости" },
+          { id: "classes", l: "Классы", i: <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> },
+          { id: "students", l: "Ученики", i: <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> },
+          { id: "teachers", l: "Учителя", i: <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> },
+          { id: "news", l: "Новости", i: <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8l-4 4v14a2 2 0 0 0 2 2z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg> },
         ].map((t) => (
           <button key={t.id} onClick={() => setTab(t.id as any)}
-            className={`py-2 rounded ${tab===t.id?"bg-card shadow font-medium":""}`}>{t.l}</button>
+            className={`py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 ${tab===t.id?"bg-card text-primary shadow-sm ring-1 ring-border":"text-muted-foreground hover:bg-muted hover:text-foreground"}`}>
+            {t.i} {t.l}
+          </button>
         ))}
       </div>
-      {tab === "classes" && <ClassesPanel classes={classes} reload={reload} />}
-      {tab === "students" && <StudentForm classes={classes} />}
-      {tab === "teachers" && <TeacherForm />}
-      {tab === "news" && <NewsForm />}
+      
+      <div className="pt-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        {tab === "classes" && <ClassesPanel classes={classes} reload={reload} />}
+        {tab === "students" && <StudentForm classes={classes} />}
+        {tab === "teachers" && <TeacherForm />}
+        {tab === "news" && <NewsForm />}
+      </div>
     </div>
   );
 }
@@ -82,42 +93,63 @@ function ClassesPanel({ classes, reload }: { classes: any[]; reload: () => void 
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex gap-2">
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Название класса (например 8А)"
-          className="flex-1 rounded-lg border border-input bg-background px-3 py-2" />
-        <button onClick={create} className="px-4 rounded-lg bg-primary text-primary-foreground">Создать</button>
+    <div className="space-y-6">
+      <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row gap-3 items-center">
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Новый класс (напр. 8А)"
+          className="flex-1 w-full rounded-xl border border-input bg-background px-4 py-3 outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium" />
+        <button onClick={create} className="w-full sm:w-auto px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:brightness-110 shadow-sm transition-all whitespace-nowrap">Создать класс</button>
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         {classes.map((c) => (
           <button key={c.id} onClick={() => openEdit(c)}
-            className={`text-left bg-card border border-border rounded-lg p-3 ${editClass?.id===c.id?"ring-2 ring-primary":""}`}>
-            <p className="font-medium">{c.name} {c.name === "7В" && <span className="text-xs text-muted-foreground">(базовый)</span>}</p>
+            className={`text-left border rounded-2xl p-4 transition-all duration-200 group ${editClass?.id===c.id?"bg-primary/5 border-primary/50 shadow-md ring-1 ring-primary/20":"bg-card border-border hover:border-primary/30 hover:shadow-sm"}`}>
+            <div className="flex justify-between items-center">
+              <p className={`font-bold text-lg ${editClass?.id===c.id?"text-primary":"text-foreground group-hover:text-primary"}`}>{c.name}</p>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-colors ${editClass?.id===c.id?"text-primary":"text-muted-foreground group-hover:text-primary/70"}`}><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </div>
+            {c.name === "7В" && <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1 block">базовый</span>}
           </button>
         ))}
       </div>
 
       {editClass && (
-        <div className="bg-card border border-border rounded-xl p-3 space-y-3">
-          <p className="font-semibold">Расписание для {editClass.name}</p>
-          {DAYS.map((dn, di) => (
-            <details key={di} className="border border-border rounded-lg" open={di===0}>
-              <summary className="px-3 py-2 cursor-pointer font-medium">{dn}</summary>
-              <div className="p-2 space-y-1">
-                {TIME_SLOTS.map((ts, i) => (
-                  <div key={i} className="flex gap-2 items-center">
-                    <span className="text-xs font-mono text-muted-foreground w-24 shrink-0">{ts[0]}–{ts[1]}</span>
-                    <input value={schedule[`${di+1}-${i+1}`] ?? ""}
-                      onChange={(e) => setSchedule((s) => ({ ...s, [`${di+1}-${i+1}`]: e.target.value }))}
-                      placeholder="Предмет / ЗАВТРАК / ОБЕД / ПОЛДНИК"
-                      className="flex-1 rounded border border-input bg-background px-2 py-1 text-sm" />
-                  </div>
-                ))}
-              </div>
-            </details>
-          ))}
-          <button onClick={saveSchedule} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground">Сохранить расписание</button>
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-lg shadow-primary/5 space-y-4 animate-in fade-in zoom-in-95 duration-300">
+          <div className="flex items-center gap-3 border-b border-border pb-4 mb-4">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black">
+              {editClass.name}
+            </div>
+            <p className="font-bold text-lg">Расписание занятий</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {DAYS.map((dn, di) => (
+              <details key={di} className="border border-border bg-background/50 rounded-xl overflow-hidden group" open={di===0}>
+                <summary className="px-4 py-3 cursor-pointer font-bold text-sm bg-card hover:bg-muted/50 transition-colors select-none flex items-center justify-between">
+                  {dn}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground group-open:rotate-180 transition-transform"><path d="m6 9 6 6 6-6"/></svg>
+                </summary>
+                <div className="p-3 space-y-2 border-t border-border">
+                  {TIME_SLOTS.map((ts, i) => (
+                    <div key={i} className="flex gap-3 items-center group/row">
+                      <span className="text-[10px] font-mono text-muted-foreground w-20 shrink-0 font-bold bg-muted px-2 py-1 rounded text-center">{ts[0]} – {ts[1]}</span>
+                      <input value={schedule[`${di+1}-${i+1}`] ?? ""}
+                        onChange={(e) => setSchedule((s) => ({ ...s, [`${di+1}-${i+1}`]: e.target.value }))}
+                        placeholder="Предмет..."
+                        className="flex-1 rounded-lg border border-transparent hover:border-border focus:border-input bg-transparent hover:bg-background focus:bg-background px-3 py-1.5 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/20" />
+                    </div>
+                  ))}
+                </div>
+              </details>
+            ))}
+          </div>
+          
+          <div className="pt-4 flex justify-end">
+            <button onClick={saveSchedule} className="px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold hover:brightness-110 shadow-sm transition-all flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Сохранить расписание
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -135,14 +167,37 @@ function StudentForm({ classes }: { classes: any[] }) {
     } catch (e: any) { toast.error(e.message); }
   };
   return (
-    <div className="bg-card border border-border rounded-xl p-4 space-y-2">
-      <select value={classId} onChange={(e) => setClassId(e.target.value)} className="w-full rounded-lg border border-input bg-background px-3 py-2">
-        <option value="">Выберите класс…</option>
-        {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-      </select>
-      <input value={full} onChange={(e) => setFull(e.target.value)} placeholder="ФИО (он же логин)" className="w-full rounded-lg border border-input bg-background px-3 py-2" />
-      <input value={pwd} onChange={(e) => setPwd(e.target.value)} placeholder="Пароль" className="w-full rounded-lg border border-input bg-background px-3 py-2" />
-      <button onClick={submit} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground">Добавить ученика</button>
+    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm max-w-lg">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+        </div>
+        <h3 className="font-bold text-lg">Регистрация ученика</h3>
+      </div>
+      
+      <div className="space-y-4">
+        <div>
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block ml-1">Класс</label>
+          <select value={classId} onChange={(e) => setClassId(e.target.value)} className="w-full rounded-xl border border-input bg-background px-4 py-3 outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium appearance-none">
+            <option value="">Выберите класс...</option>
+            {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+        
+        <div>
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block ml-1">ФИО (логин)</label>
+          <input value={full} onChange={(e) => setFull(e.target.value)} placeholder="Например: Иванов Иван" className="w-full rounded-xl border border-input bg-background px-4 py-3 outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium" />
+        </div>
+        
+        <div>
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block ml-1">Пароль</label>
+          <input value={pwd} onChange={(e) => setPwd(e.target.value)} placeholder="Сложный пароль" className="w-full rounded-xl border border-input bg-background px-4 py-3 outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium" />
+        </div>
+        
+        <button onClick={submit} className="w-full mt-2 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:brightness-110 shadow-sm transition-all flex items-center justify-center gap-2">
+          Добавить ученика
+        </button>
+      </div>
     </div>
   );
 }
@@ -161,11 +216,34 @@ function TeacherForm() {
     } catch (e: any) { toast.error(e.message); }
   };
   return (
-    <div className="bg-card border border-border rounded-xl p-4 space-y-2">
-      <input value={full} onChange={(e) => setFull(e.target.value)} placeholder="ФИО учителя (он же логин)" className="w-full rounded-lg border border-input bg-background px-3 py-2" />
-      <input value={pwd} onChange={(e) => setPwd(e.target.value)} placeholder="Пароль" className="w-full rounded-lg border border-input bg-background px-3 py-2" />
-      <input value={subjects} onChange={(e) => setSubjects(e.target.value)} placeholder="Предметы через запятую (Математика, Физика)" className="w-full rounded-lg border border-input bg-background px-3 py-2" />
-      <button onClick={submit} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground">Добавить учителя</button>
+    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm max-w-lg">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        </div>
+        <h3 className="font-bold text-lg">Регистрация учителя</h3>
+      </div>
+      
+      <div className="space-y-4">
+        <div>
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block ml-1">ФИО (логин)</label>
+          <input value={full} onChange={(e) => setFull(e.target.value)} placeholder="Например: Петров Петр" className="w-full rounded-xl border border-input bg-background px-4 py-3 outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium" />
+        </div>
+        
+        <div>
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block ml-1">Пароль</label>
+          <input value={pwd} onChange={(e) => setPwd(e.target.value)} placeholder="Сложный пароль" className="w-full rounded-xl border border-input bg-background px-4 py-3 outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium" />
+        </div>
+        
+        <div>
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block ml-1">Предметы</label>
+          <input value={subjects} onChange={(e) => setSubjects(e.target.value)} placeholder="Математика, Физика..." className="w-full rounded-xl border border-input bg-background px-4 py-3 outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium" />
+        </div>
+        
+        <button onClick={submit} className="w-full mt-2 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:brightness-110 shadow-sm transition-all flex items-center justify-center gap-2">
+          Добавить учителя
+        </button>
+      </div>
     </div>
   );
 }

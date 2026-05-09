@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { Mic, Image as ImgIcon, Send, Square, Smile } from "lucide-react";
+import { Mic, Image as ImgIcon, Send, Square, Smile, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 const STICKERS = ["😀", "😂", "🥰", "😎", "🤔", "👍", "👏", "🎉", "❤️", "🔥", "💯", "📚", "✏️", "🎒", "🍎", "⚽"];
@@ -29,6 +29,8 @@ export function ChatRoom({ classId }: { classId: string }) {
     const ch = supabase.channel(`chat:${classId}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `class_id=eq.${classId}` },
         (p) => setMessages((m) => [...m, p.new as any]))
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "messages" },
+        (p) => setMessages((m) => m.filter(msg => msg.id !== p.old.id)))
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [classId]);
@@ -86,20 +88,38 @@ export function ChatRoom({ classId }: { classId: string }) {
   };
   const stopRec = () => { recRef.current?.stop(); setRecording(false); };
 
+  const deleteMessage = async (id: string) => {
+    if (!confirm("Удалить это сообщение?")) return;
+    const { error } = await supabase.from("messages").delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else setMessages(prev => prev.filter(m => m.id !== id));
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-13rem)] md:h-[calc(100vh-3rem)] bg-card rounded-xl border border-border overflow-hidden">
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-2">
         {messages.map((m) => {
           const mine = m.sender_id === profile?.id;
           return (
-            <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[80%] rounded-2xl px-3 py-2 ${mine ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
-                {!mine && <p className="text-[10px] opacity-70 mb-0.5">{profiles[m.sender_id]?.full_name ?? "—"}</p>}
+            <div key={m.id} className={`flex group ${mine ? "justify-end" : "justify-start"}`}>
+              <div className={`relative max-w-[80%] rounded-2xl px-3 py-2 ${mine ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+                {!mine && <p className="text-[10px] opacity-70 mb-0.5 font-bold">{profiles[m.sender_id]?.full_name ?? "—"}</p>}
+                
+                {mine && (
+                  <button 
+                    onClick={() => deleteMessage(m.id)}
+                    className="absolute -left-8 top-1/2 -translate-y-1/2 p-1.5 text-muted-foreground hover:text-destructive bg-background rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-all scale-90 hover:scale-100"
+                    title="Удалить"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
+
                 {m.kind === "text" && <p className="text-sm whitespace-pre-wrap">{m.content}</p>}
                 {m.kind === "sticker" && <p className="text-4xl">{m.content}</p>}
-                {m.kind === "image" && <img src={m.media_url} alt="" className="rounded-lg max-h-64" />}
-                {m.kind === "voice" && <audio controls src={m.media_url} className="max-w-[220px]" />}
-                <p className="text-[10px] opacity-60 mt-1 text-right">{new Date(m.created_at).toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"})}</p>
+                {m.kind === "image" && <img src={m.media_url} alt="" className="rounded-lg max-h-64 mt-1 object-contain bg-black/5" />}
+                {m.kind === "voice" && <audio controls src={m.media_url} className="max-w-[220px] h-10 mt-1" />}
+                <p className={`text-[10px] mt-1 ${mine ? "text-primary-foreground/70" : "text-muted-foreground"} text-right`}>{new Date(m.created_at).toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"})}</p>
               </div>
             </div>
           );
