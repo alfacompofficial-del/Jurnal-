@@ -1,0 +1,6 @@
+{
+  "appId": "com.schoolconnect.hub",
+  "appName": "SchoolConnectHub",
+  "webDir": "dist/client",
+  "bundledWebRuntime": false
+}

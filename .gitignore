@@ -10,11 +10,16 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dist_electron
 .output
 .vinxi
 .tanstack/**
 .nitro
 *.local
+
+# Build outputs (large binaries)
+android/
+dist_electron/
 
 # Wrangler / Cloudflare
 .wrangler/
